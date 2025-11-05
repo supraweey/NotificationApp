@@ -15,6 +15,8 @@ import com.example.notificationapp.MainActivity
 import com.example.notificationapp.R
 
 object NotificationHelper {
+    const val CHANNEL_ID = "app_default_channel"
+
     fun createNotificationChannel(
         context: Context,
         importance: Int,
@@ -24,8 +26,7 @@ object NotificationHelper {
     ) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
 
-            val channelId = "${context.packageName}-$name"
-            val channel = NotificationChannel(channelId, name, importance)
+            val channel = NotificationChannel(CHANNEL_ID, name, importance)
             channel.description = description
             channel.setShowBadge(showBadge)
 
@@ -38,14 +39,13 @@ object NotificationHelper {
         context: Context, title: String, message: String,
         bigText: String, autoCancel: Boolean
     ) {
-        val channelId = "${context.packageName}-${context.getString(R.string.app_name)}"
 
-        val notificationBuilder = NotificationCompat.Builder(context, channelId).apply {
+        val notificationBuilder = NotificationCompat.Builder(context, CHANNEL_ID).apply {
             setSmallIcon(R.drawable.ic_stat_medicine) // 3
             setContentTitle(title) // 4
             setContentText(message) // 5
             setStyle(NotificationCompat.BigTextStyle().bigText(bigText)) // 6
-            priority = NotificationCompat.PRIORITY_DEFAULT // 7
+            priority = NotificationCompat.PRIORITY_MAX // 7
             setAutoCancel(autoCancel) // 8
 
             val intent = Intent(context, MainActivity::class.java)

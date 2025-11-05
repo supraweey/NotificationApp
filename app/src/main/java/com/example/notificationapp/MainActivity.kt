@@ -48,7 +48,7 @@ class MainActivity : AppCompatActivity() {
     private fun registerNotification() {
         NotificationHelper.createNotificationChannel(
             this,
-            NotificationManagerCompat.IMPORTANCE_DEFAULT, false,
+            NotificationManagerCompat.IMPORTANCE_HIGH, false,
             getString(R.string.app_name), "App notification channel."
         )
 
