@@ -6,11 +6,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
-import android.provider.Settings
 import android.widget.Toast
-import androidx.activity.enableEdgeToEdge
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.NotificationCompat
@@ -18,7 +14,6 @@ import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.notificationapp.databinding.ActivityMainBinding
 import com.example.notificationapp.notif.NotificationHelper
-import com.google.android.material.snackbar.Snackbar
 
 class MainActivity : AppCompatActivity() {
 
@@ -26,7 +21,7 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            showSampleNotification()
+            showAllDetailNotification()
         } else {
             Toast.makeText(this, "ไม่ได้ให้สิทธิแจ้งเตือน", Toast.LENGTH_SHORT).show()
         }
@@ -34,13 +29,12 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        enableEdgeToEdge()
         val binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
         NotificationHelper.createNotificationChannel(this)
 
-        binding.notifyTv.setOnClickListener { registerNotification() }
+        binding.notifyDetailBtn.setOnClickListener { registerNotification() }
     }
 
     private fun registerNotification() {
@@ -51,33 +45,33 @@ class MainActivity : AppCompatActivity() {
         ) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            showSampleNotification()
-
+            showAllDetailNotification()
         }
-
     }
 
-    private fun showSampleNotification() {
-        val pendingIntent = PendingIntent.getActivity(
-            this, 0, Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+    private fun showAllDetailNotification(){
+        showDetailNotification(itemId = 101, title = "แจ้งเตือน ครั้งที่ 1", message = "รายละเอียด")
+        showDetailNotification(itemId = 202, title = "แจ้งเตือน ครั้งที่ 2", message = "รายละเอียด2")
+    }
 
+    private fun showDetailNotification(itemId: Int, title: String, message: String){
+        val detailActivity = Intent(this, DetailActivity::class.java).apply {
+            putExtra("item_id", itemId)
+        }
+        val pendingIntent = PendingIntent.getActivity(this, itemId, detailActivity, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
             .setSmallIcon(R.drawable.ic_stat_medicine)
-            .setContentTitle(getString(R.string.channel_general_name))
-            .setContentText(getString(R.string.channel_general_desc))
+            .setContentTitle(title)
+            .setContentText(message)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .setPriority(NotificationCompat.PRIORITY_HIGH)
-
         if (Build.VERSION.SDK_INT < 33 ||
             ContextCompat.checkSelfPermission(
                 this,
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            NotificationManagerCompat.from(this).notify(1001, builder.build())
+            NotificationManagerCompat.from(this).notify(itemId, builder.build())
         }
     }
 
