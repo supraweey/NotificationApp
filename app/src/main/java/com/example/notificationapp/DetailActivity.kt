@@ -4,9 +4,12 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.IntentCompat
 import androidx.core.view.ViewCompat
 import androidx.core.view.WindowInsetsCompat
+import com.example.notificationapp.MainActivity.Companion.NOTIFICATION_MODEL
 import com.example.notificationapp.databinding.ActivityDetailBinding
+import com.example.notificationapp.model.NotificationModel
 
 class DetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -17,8 +20,8 @@ class DetailActivity : AppCompatActivity() {
         val binding = ActivityDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        val itemId = intent.getIntExtra("item_id", -1)
-        binding.notifyDetailTv.text = "แจ้งเตือน $itemId"
+        val item = IntentCompat.getParcelableExtra(intent, NOTIFICATION_MODEL, NotificationModel::class.java)
+        binding.notifyDetailTv.text = "แจ้งเตือน ${item.title}"
 
     }
 }

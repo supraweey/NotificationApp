@@ -13,6 +13,7 @@ import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.notificationapp.databinding.ActivityMainBinding
+import com.example.notificationapp.model.NotificationModel
 import com.example.notificationapp.notif.NotificationHelper
 
 class MainActivity : AppCompatActivity() {
@@ -50,19 +51,19 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showAllDetailNotification(){
-        showDetailNotification(itemId = 101, title = "แจ้งเตือน ครั้งที่ 1", message = "รายละเอียด")
-        showDetailNotification(itemId = 202, title = "แจ้งเตือน ครั้งที่ 2", message = "รายละเอียด2")
+        showDetailNotification(NotificationModel(itemId = 101, title = "แจ้งเตือน ครั้งที่ 1", message = "รายละเอียด"))
+        showDetailNotification(NotificationModel(itemId = 202, title = "แจ้งเตือน ครั้งที่ 2", message = "รายละเอียด2"))
     }
 
-    private fun showDetailNotification(itemId: Int, title: String, message: String){
+    private fun showDetailNotification(notificationModel: NotificationModel){
         val detailActivity = Intent(this, DetailActivity::class.java).apply {
-            putExtra("item_id", itemId)
+            putExtra(NOTIFICATION_MODEL, notificationModel)
         }
-        val pendingIntent = PendingIntent.getActivity(this, itemId, detailActivity, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(this, notificationModel.itemId, detailActivity, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
         val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
             .setSmallIcon(R.drawable.ic_stat_medicine)
             .setContentTitle(title)
-            .setContentText(message)
+            .setContentText(notificationModel.message)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
         if (Build.VERSION.SDK_INT < 33 ||
@@ -71,8 +72,11 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            NotificationManagerCompat.from(this).notify(itemId, builder.build())
+            NotificationManagerCompat.from(this).notify(notificationModel.itemId, builder.build())
         }
     }
 
+    companion object {
+        const val NOTIFICATION_MODEL = "notificationModel"
+    }
 }
