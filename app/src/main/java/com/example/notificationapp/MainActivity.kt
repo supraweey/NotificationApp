@@ -60,12 +60,17 @@ class MainActivity : AppCompatActivity() {
             putExtra(NOTIFICATION_MODEL, notificationModel)
         }
         val pendingIntent = PendingIntent.getActivity(this, notificationModel.itemId, detailActivity, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+
+        val markDonePendingIntent =
+            NotificationHelper.createMarkDonePendingIntent(this, notificationModel.itemId)
+
         val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
             .setSmallIcon(R.drawable.ic_stat_medicine)
             .setContentTitle(title)
             .setContentText(notificationModel.message)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
+            .addAction(R.drawable.ic_check_circle, "Delete", markDonePendingIntent)
         if (Build.VERSION.SDK_INT < 33 ||
             ContextCompat.checkSelfPermission(
                 this,
