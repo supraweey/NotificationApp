@@ -5,6 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.widget.Toast
 import androidx.core.app.NotificationManagerCompat
+import androidx.core.app.RemoteInput
 import com.example.notificationapp.notif.NotificationHelper
 
 class NotificationActionReceiver: BroadcastReceiver() {
@@ -19,7 +20,19 @@ class NotificationActionReceiver: BroadcastReceiver() {
                 }
             }
 
+            NotificationHelper.ACTION_INLINE_REPLY -> {
+                val replyText = getReplyText(intent)
+                Toast.makeText(context, "Reply : $replyText", Toast.LENGTH_SHORT).show()
+            }
+
         }
 
     }
+
+    private fun getReplyText(intent: Intent): String {
+        val remoteInput = RemoteInput.getResultsFromIntent(intent)
+        return remoteInput?.getCharSequence(NotificationHelper.KEY_TEXT_REPLY).toString()
+
+    }
+
 }

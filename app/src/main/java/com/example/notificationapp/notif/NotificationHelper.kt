@@ -1,20 +1,14 @@
 package com.example.notificationapp.notif
 
-import android.Manifest
-import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
-import android.app.TaskStackBuilder
 import android.content.Context
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
-import androidx.core.content.ContextCompat
-import com.example.notificationapp.MainActivity
+import androidx.core.app.RemoteInput
 import com.example.notificationapp.NotificationActionReceiver
 import com.example.notificationapp.R
 
@@ -22,7 +16,9 @@ object NotificationHelper {
     const val CHANNEL_GENERAL = "channel_general_high"
 
     const val ACTION_MARK_DONE = "com.example.notificationapp.ACTION_MARK_DONE"
+    const val ACTION_INLINE_REPLY = "com.example.notificationapp.ACTION_INLINE_REPLY"
     const val EXTRA_NOTIFICATION_ID = "extra_notification_id"
+    const val KEY_TEXT_REPLY = "key_text_reply"
 
     fun createNotificationChannel(context: Context) {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -51,7 +47,39 @@ object NotificationHelper {
             intent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-    
+
+    }
+
+    fun createInlineReplyAction(
+        context: Context,
+        notificationId: Int
+    ): NotificationCompat.Action {
+        val remoteInput = RemoteInput.Builder(KEY_TEXT_REPLY)
+            .setLabel("พิมพ์คำตอบของคุณ...")
+            .build()
+        val replyIntent = Intent(context, NotificationActionReceiver::class.java).apply {
+            action = ACTION_INLINE_REPLY
+            putExtra(EXTRA_NOTIFICATION_ID, notificationId)
+        }
+
+        val replyFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+
+        val replyPendingIntent = PendingIntent.getBroadcast(
+            context,
+            notificationId,
+            replyIntent,
+            replyFlag
+        )
+
+        return NotificationCompat.Action.Builder(
+            R.drawable.ic_reply,
+            "ตอบกลับ",
+            replyPendingIntent
+        ).addRemoteInput(remoteInput).setAllowGeneratedReplies(true).build()
     }
 
 

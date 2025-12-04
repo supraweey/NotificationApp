@@ -22,7 +22,8 @@ class MainActivity : AppCompatActivity() {
         ActivityResultContracts.RequestPermission()
     ) { isGranted: Boolean ->
         if (isGranted) {
-            showAllDetailNotification()
+            showChatNotification()
+//            showAllDetailNotification()
         } else {
             Toast.makeText(this, "ไม่ได้ให้สิทธิแจ้งเตือน", Toast.LENGTH_SHORT).show()
         }
@@ -46,23 +47,44 @@ class MainActivity : AppCompatActivity() {
         ) {
             requestPermissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
         } else {
-            showAllDetailNotification()
+            showChatNotification()
+//            showAllDetailNotification()
         }
     }
 
-    private fun showAllDetailNotification(){
-        showDetailNotification(NotificationModel(itemId = 101, title = "แจ้งเตือน ครั้งที่ 1", message = "รายละเอียด"))
-        showDetailNotification(NotificationModel(itemId = 202, title = "แจ้งเตือน ครั้งที่ 2", message = "รายละเอียด2"))
+    private fun showAllDetailNotification() {
+        showDetailNotification(
+            NotificationModel(
+                itemId = 101,
+                title = "แจ้งเตือน ครั้งที่ 1",
+                message = "รายละเอียด"
+            )
+        )
+        showDetailNotification(
+            NotificationModel(
+                itemId = 202,
+                title = "แจ้งเตือน ครั้งที่ 2",
+                message = "รายละเอียด2"
+            )
+        )
     }
 
-    private fun showDetailNotification(notificationModel: NotificationModel){
+    private fun showDetailNotification(notificationModel: NotificationModel) {
         val detailActivity = Intent(this, DetailActivity::class.java).apply {
             putExtra(NOTIFICATION_MODEL, notificationModel)
         }
-        val pendingIntent = PendingIntent.getActivity(this, notificationModel.itemId, detailActivity, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE)
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            notificationModel.itemId,
+            detailActivity,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
 
         val markDonePendingIntent =
             NotificationHelper.createMarkDonePendingIntent(this, notificationModel.itemId)
+
+        val inlineReplyAction =
+            NotificationHelper.createInlineReplyAction(this, notificationModel.itemId)
 
         val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
             .setSmallIcon(R.drawable.ic_stat_medicine)
@@ -70,7 +92,8 @@ class MainActivity : AppCompatActivity() {
             .setContentText(notificationModel.message)
             .setAutoCancel(true)
             .setContentIntent(pendingIntent)
-            .addAction(R.drawable.ic_check_circle, "Delete", markDonePendingIntent)
+            .addAction(inlineReplyAction)
+//            .addAction(R.drawable.ic_check_circle, "Delete", markDonePendingIntent)
         if (Build.VERSION.SDK_INT < 33 ||
             ContextCompat.checkSelfPermission(
                 this,
@@ -79,6 +102,35 @@ class MainActivity : AppCompatActivity() {
         ) {
             NotificationManagerCompat.from(this).notify(notificationModel.itemId, builder.build())
         }
+    }
+
+    private fun showChatNotification() {
+        val notificationId = 2001
+        val contentIntent = PendingIntent.getActivity(
+            this,
+            0,
+            Intent(this, MainActivity::class.java),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+
+        val inlineReplyAction = NotificationHelper.createInlineReplyAction(this, notificationId)
+
+        val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
+            .setSmallIcon(R.drawable.ic_stat_medicine)
+            .setContentTitle(title)
+            .setContentText("Question ?")
+            .setAutoCancel(true)
+            .setContentIntent(contentIntent)
+            .addAction(inlineReplyAction)
+        if (Build.VERSION.SDK_INT < 33 ||
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            NotificationManagerCompat.from(this).notify(notificationId, builder.build())
+        }
+
     }
 
     companion object {
