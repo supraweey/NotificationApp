@@ -1,14 +1,19 @@
 package com.example.notificationapp.notif
 
+import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
 import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.graphics.Color
 import android.os.Build
 import androidx.core.app.NotificationCompat
+import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
+import androidx.core.content.ContextCompat
+import com.example.notificationapp.DetailActivity
 import com.example.notificationapp.NotificationActionReceiver
 import com.example.notificationapp.R
 
@@ -82,5 +87,45 @@ object NotificationHelper {
         ).addRemoteInput(remoteInput).setAllowGeneratedReplies(true).build()
     }
 
+    fun buildGeneralNotification(
+        context: Context,
+        title: String,
+        message: String,
+        requestCode: Int = 1001,
+        destinationIntent: Intent? = null,
+        autoCancel: Boolean = true
+    ): NotificationCompat.Builder {
+        val builder = NotificationCompat.Builder(context, CHANNEL_GENERAL)
+            .setSmallIcon(R.drawable.ic_stat_medicine)
+            .setContentTitle(title)
+            .setContentText(message)
+            .setAutoCancel(autoCancel)
+
+        if (destinationIntent != null) {
+            val pendingIntent = PendingIntent.getActivity(
+                context,
+                requestCode,
+                destinationIntent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+            builder.setContentIntent(pendingIntent)
+        }
+
+        return builder
+
+    }
+
+    fun notify(context: Context, id: Int, builder: NotificationCompat.Builder) {
+        val nm = NotificationManagerCompat.from(context)
+
+        if (Build.VERSION.SDK_INT < 33 ||
+            ContextCompat.checkSelfPermission(
+                context,
+                Manifest.permission.POST_NOTIFICATIONS
+            ) == PackageManager.PERMISSION_GRANTED
+        ) {
+            nm.notify(id, builder.build())
+        }
+    }
 
 }

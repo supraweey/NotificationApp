@@ -9,8 +9,6 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.app.NotificationCompat
-import androidx.core.app.NotificationManagerCompat
 import androidx.core.content.ContextCompat
 import com.example.notificationapp.databinding.ActivityMainBinding
 import com.example.notificationapp.model.NotificationModel
@@ -70,11 +68,13 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showChatNotification() {
-        showChatNotification(NotificationModel(
-            itemId = 2001,
-            title = "This is chat",
-            message = "Type your question..."
-        ))
+        showChatNotification(
+            NotificationModel(
+                itemId = 2001,
+                title = "This is chat",
+                message = "Type your question..."
+            )
+        )
     }
 
     private fun showDetailNotification(notificationModel: NotificationModel) {
@@ -87,49 +87,40 @@ class MainActivity : AppCompatActivity() {
             detailActivity,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        val detailIntent = Intent(this, DetailActivity::class.java).apply {
+            putExtra(MainActivity.NOTIFICATION_MODEL, notificationModel)
+        }
 
         val markDonePendingIntent =
             NotificationHelper.createMarkDonePendingIntent(this, notificationModel.itemId)
 
-        val inlineReplyAction =
-            NotificationHelper.createInlineReplyAction(this, notificationModel.itemId)
-
-        val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
-            .setSmallIcon(R.drawable.ic_stat_medicine)
-            .setContentTitle(title)
-            .setContentText(notificationModel.message)
-            .setAutoCancel(true)
-            .setContentIntent(pendingIntent)
-            .addAction(inlineReplyAction)
-//            .addAction(R.drawable.ic_check_circle, "Delete", markDonePendingIntent)
-        if (Build.VERSION.SDK_INT < 33 ||
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            NotificationManagerCompat.from(this).notify(notificationModel.itemId, builder.build())
-        }
+        val builder = NotificationHelper.buildGeneralNotification(
+            context = this,
+            title = notificationModel.title,
+            message = notificationModel.message,
+            requestCode = notificationModel.itemId,
+            destinationIntent = detailIntent
+        ).addAction(
+            R.drawable.ic_check_circle,
+            "Delete",
+            markDonePendingIntent
+        )
+        NotificationHelper.notify(this, id = notificationModel.itemId, builder)
     }
 
     private fun showChatNotification(notificationModel: NotificationModel) {
-        val inlineReplyAction = NotificationHelper.createInlineReplyAction(this, notificationModel.itemId)
+        val inlineReplyAction =
+            NotificationHelper.createInlineReplyAction(this, notificationModel.itemId)
 
-        val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
-            .setSmallIcon(R.drawable.ic_stat_medicine)
-            .setContentTitle(notificationModel.title)
-            .setContentText(notificationModel.message)
-            .setAutoCancel(true)
-            .addAction(inlineReplyAction)
-        if (Build.VERSION.SDK_INT < 33 ||
-            ContextCompat.checkSelfPermission(
-                this,
-                Manifest.permission.POST_NOTIFICATIONS
-            ) == PackageManager.PERMISSION_GRANTED
-        ) {
-            NotificationManagerCompat.from(this).notify(notificationModel.itemId, builder.build())
-        }
+        val builder = NotificationHelper.buildGeneralNotification(
+            context = this,
+            title = notificationModel.title,
+            message = notificationModel.message,
+            destinationIntent = null,
+            requestCode = notificationModel.itemId
+        ).addAction(inlineReplyAction)
 
+        NotificationHelper.notify(this, id = notificationModel.itemId, builder)
     }
 
     companion object {

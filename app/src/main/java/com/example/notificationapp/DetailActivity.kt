@@ -24,10 +24,10 @@ class DetailActivity : AppCompatActivity() {
         val item = IntentCompat.getParcelableExtra(intent, NOTIFICATION_MODEL, NotificationModel::class.java)
         val replyText = intent.getStringExtra(NotificationHelper.KEY_TEXT_REPLY)
 
-        val titleText = item?.title ?: "ข้อความตอบกลับ"
+        val titleText = item?.title ?: "ยังไม่มีข้อมูลที่แนบ"
         val reply = replyText ?: "ยังไม่มีข้อความตอบกลับ"
 
-        binding.notifyDetailTv.text = "แจ้งเตือน ${titleText} ?: $reply"
+        binding.notifyDetailTv.text = "แจ้งเตือน: ${titleText + "\n" + reply} "
 
     }
 }
