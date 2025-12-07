@@ -69,6 +69,14 @@ class MainActivity : AppCompatActivity() {
         )
     }
 
+    private fun showChatNotification() {
+        showChatNotification(NotificationModel(
+            itemId = 2001,
+            title = "This is chat",
+            message = "Type your question..."
+        ))
+    }
+
     private fun showDetailNotification(notificationModel: NotificationModel) {
         val detailActivity = Intent(this, DetailActivity::class.java).apply {
             putExtra(NOTIFICATION_MODEL, notificationModel)
@@ -104,23 +112,14 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    private fun showChatNotification() {
-        val notificationId = 2001
-        val contentIntent = PendingIntent.getActivity(
-            this,
-            0,
-            Intent(this, MainActivity::class.java),
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-
-        val inlineReplyAction = NotificationHelper.createInlineReplyAction(this, notificationId)
+    private fun showChatNotification(notificationModel: NotificationModel) {
+        val inlineReplyAction = NotificationHelper.createInlineReplyAction(this, notificationModel.itemId)
 
         val builder = NotificationCompat.Builder(this, NotificationHelper.CHANNEL_GENERAL)
             .setSmallIcon(R.drawable.ic_stat_medicine)
-            .setContentTitle(title)
-            .setContentText("Question ?")
+            .setContentTitle(notificationModel.title)
+            .setContentText(notificationModel.message)
             .setAutoCancel(true)
-            .setContentIntent(contentIntent)
             .addAction(inlineReplyAction)
         if (Build.VERSION.SDK_INT < 33 ||
             ContextCompat.checkSelfPermission(
@@ -128,7 +127,7 @@ class MainActivity : AppCompatActivity() {
                 Manifest.permission.POST_NOTIFICATIONS
             ) == PackageManager.PERMISSION_GRANTED
         ) {
-            NotificationManagerCompat.from(this).notify(notificationId, builder.build())
+            NotificationManagerCompat.from(this).notify(notificationModel.itemId, builder.build())
         }
 
     }

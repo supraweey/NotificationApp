@@ -22,7 +22,17 @@ class NotificationActionReceiver: BroadcastReceiver() {
 
             NotificationHelper.ACTION_INLINE_REPLY -> {
                 val replyText = getReplyText(intent)
-                Toast.makeText(context, "Reply : $replyText", Toast.LENGTH_SHORT).show()
+
+                val detailIntent = Intent(context, DetailActivity::class.java).apply {
+                    putExtra(NotificationHelper.KEY_TEXT_REPLY, replyText)
+                    /* For BroadcastReceiver */
+                    addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                }
+                context?.startActivity(detailIntent)
+
+                notificationId?.let {
+                    NotificationManagerCompat.from(context).cancel(notificationId)
+                }
             }
 
         }

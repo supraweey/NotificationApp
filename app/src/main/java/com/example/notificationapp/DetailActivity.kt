@@ -10,6 +10,7 @@ import androidx.core.view.WindowInsetsCompat
 import com.example.notificationapp.MainActivity.Companion.NOTIFICATION_MODEL
 import com.example.notificationapp.databinding.ActivityDetailBinding
 import com.example.notificationapp.model.NotificationModel
+import com.example.notificationapp.notif.NotificationHelper
 
 class DetailActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -21,7 +22,12 @@ class DetailActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         val item = IntentCompat.getParcelableExtra(intent, NOTIFICATION_MODEL, NotificationModel::class.java)
-        binding.notifyDetailTv.text = "แจ้งเตือน ${item.title}"
+        val replyText = intent.getStringExtra(NotificationHelper.KEY_TEXT_REPLY)
+
+        val titleText = item?.title ?: "ข้อความตอบกลับ"
+        val reply = replyText ?: "ยังไม่มีข้อความตอบกลับ"
+
+        binding.notifyDetailTv.text = "แจ้งเตือน ${titleText} ?: $reply"
 
     }
 }
